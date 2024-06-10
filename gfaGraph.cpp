@@ -16,7 +16,7 @@ struct Segment {
 
 struct Link
 {
-    int from;
+    // int from; <- Not needed
     char fromOrient;
     int to;
     char toOrient;
@@ -26,8 +26,6 @@ struct Link
 
 class GfaGraph {
     private:
-        int nSegments;
-        int nLinks;
         vector<Segment> segments;
         unordered_map<string, int> segmentIndex;
         vector<vector<Link>> links;
@@ -54,12 +52,12 @@ class GfaGraph {
         
         void addLink(string from, char fromOrient, string to, char toOrient, string overlap){
             Link link;
-            link.from = segmentIndex[from];
+            //link.from = segmentIndex[from];
             link.fromOrient = fromOrient;
             link.to = segmentIndex[to];
             link.toOrient = toOrient;
             link.overlap = overlap;
-            links[link.from].push_back(link);
+            links[segmentIndex[from]].push_back(link);
         }
 
 
@@ -71,9 +69,74 @@ class GfaGraph {
         void printLinks(){
             for (int i = 0; i < links.size(); i++){
                 for (Link link : links[i]){
-                    cout << "Link: " << link.from << " " << link.fromOrient << " " << link.to << " " << link.toOrient << " " << link.overlap << endl;
+                    cout << "Link: " << i << " " << link.fromOrient << " " << link.to << " " << link.toOrient << " " << link.overlap << endl;
                 }
             }
+        }
+
+
+        bool isSegmentVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus){
+            if (orientation == '+'){
+                return visitedPlus[v];
+            } else {
+                return visitedMinus[v];
+            }
+        }
+
+        bool isCyclicUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visiteMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus){
+            cout << "Visiting: " << v << " " << orientation << endl;
+            if (!isSegmentVisitedWithOrientation(v, orientation, visitedPlus, visiteMinus)){
+                if (orientation == '+'){
+                    visitedPlus[v] = true;
+                    recStackPlus[v] = true;
+                } else {
+                    visiteMinus[v] = true;
+                    recStackMinus[v] = true;
+                }
+
+                for (Link link : links[v]){
+                    if (link.fromOrient == orientation){
+                        if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visiteMinus) && isCyclicUtil(link.to, link.toOrient, visitedPlus, visiteMinus, recStackPlus, recStackMinus)){
+                            return true;
+                        } 
+                        else {
+                            if (link.toOrient == '+' && recStackPlus[link.to]){
+                                return true;
+                            }
+                            if (link.toOrient == '-' && recStackMinus[link.to]){
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            if (orientation == '+'){
+                recStackPlus[v] = false;
+            } else {
+                recStackMinus[v] = false;
+            }
+            return false;
+        }
+
+
+        bool isCyclic(){
+            cout << "Checking for cycles" << endl;
+            vector<bool> visitedPlus(segments.size(), false);
+            vector<bool> visitedMinus(segments.size(), false);
+            vector<bool> recStackPlus(segments.size(), false);
+            vector<bool> recStackMinus(segments.size(), false);
+
+            for (Segment segment : segments){
+                cout << "Checking segment: " << segment.id << " oriented: "<< '+' << endl;
+                if (!visitedPlus[segment.id] && isCyclicUtil(segment.id, '+', visitedPlus, visitedMinus, recStackPlus, recStackMinus)){
+                    return true;
+                }
+                cout << "Checking segment: " << segment.id << " oriented: "<< '-' << endl;
+                if (!visitedMinus[segment.id] && isCyclicUtil(segment.id, '-', visitedPlus, visitedMinus, recStackPlus, recStackMinus)){
+                    return true;
+                }
+            }
+            return false;
         }
 };
 

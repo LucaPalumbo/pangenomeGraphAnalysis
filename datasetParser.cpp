@@ -59,10 +59,11 @@ class DatasetParser {
         }
         void handleSegment(GfaGraph *graph, string line){
             vector<string> data = split(line, '\t');
-            if (data.size() != 3){
+            /*if (data.size() != 3){
                 cout << "Error: Invalid segment line" << endl;
+                cout << line << endl;
                 exit(1);
-            }
+            }*/
             string name = data[1];
             string sequence = data[2];
             graph->addSegment(name, sequence);
