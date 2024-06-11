@@ -73,6 +73,16 @@ class GfaGraph {
                 }
             }
         }
+        void printLinks(string segmentName){
+            int segmentId = segmentIndex[segmentName];
+            for (Link link : links[segmentId]){
+                cout << "Link: " << segmentId << " " << link.fromOrient << " " << link.to << " " << link.toOrient << " " << link.overlap << endl;
+            }
+        }
+
+        string getSegmentName(int id){
+            return segments[id].name;
+        }
 
 
         bool isSegmentVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus){
@@ -84,7 +94,7 @@ class GfaGraph {
         }
 
         bool isCyclicUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visiteMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus){
-            cout << "Visiting: " << v << " " << orientation << endl;
+            //cout << "Visiting: " << v << " " << orientation << endl;
             if (!isSegmentVisitedWithOrientation(v, orientation, visitedPlus, visiteMinus)){
                 if (orientation == '+'){
                     visitedPlus[v] = true;
@@ -95,15 +105,19 @@ class GfaGraph {
                 }
 
                 for (Link link : links[v]){
+                    //cout << v << " Checking link: " << link.to << " oriented: " << link.toOrient << endl;
                     if (link.fromOrient == orientation){
                         if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visiteMinus) && isCyclicUtil(link.to, link.toOrient, visitedPlus, visiteMinus, recStackPlus, recStackMinus)){
+                            cout << "Cycle detected at segment: " << getSegmentName(v) << " " << orientation << " -> " << getSegmentName(link.to) << " " << link.toOrient << endl;
                             return true;
                         } 
                         else {
                             if (link.toOrient == '+' && recStackPlus[link.to]){
+                                cout << "Cycle detected at segment: " << getSegmentName(v) << " " << orientation << " -> " << getSegmentName(link.to) << " " << link.toOrient << endl;
                                 return true;
                             }
                             if (link.toOrient == '-' && recStackMinus[link.to]){
+                                cout << "Cycle detected at segment: " << getSegmentName(v) << " " << orientation << " -> " << getSegmentName(link.to) << " " << link.toOrient << endl;
                                 return true;
                             }
                         }
@@ -127,11 +141,11 @@ class GfaGraph {
             vector<bool> recStackMinus(segments.size(), false);
 
             for (Segment segment : segments){
-                cout << "Checking segment: " << segment.id << " oriented: "<< '+' << endl;
+                //cout << "Checking segment: " << segment.id << " oriented: "<< '+' << endl;
                 if (!visitedPlus[segment.id] && isCyclicUtil(segment.id, '+', visitedPlus, visitedMinus, recStackPlus, recStackMinus)){
                     return true;
                 }
-                cout << "Checking segment: " << segment.id << " oriented: "<< '-' << endl;
+                //cout << "Checking segment: " << segment.id << " oriented: "<< '-' << endl;
                 if (!visitedMinus[segment.id] && isCyclicUtil(segment.id, '-', visitedPlus, visitedMinus, recStackPlus, recStackMinus)){
                     return true;
                 }
