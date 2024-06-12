@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unordered_map>
+#include <algorithm>
 
 using namespace std;
 
@@ -16,7 +17,7 @@ struct Segment {
 
 struct Link
 {
-    // int from; <- Not needed
+    int from;
     char fromOrient;
     int to;
     char toOrient;
@@ -52,7 +53,7 @@ class GfaGraph {
         
         void addLink(string from, char fromOrient, string to, char toOrient, string overlap){
             Link link;
-            //link.from = segmentIndex[from];
+            link.from = segmentIndex[from];
             link.fromOrient = fromOrient;
             link.to = segmentIndex[to];
             link.toOrient = toOrient;
@@ -93,31 +94,32 @@ class GfaGraph {
             }
         }
 
+        void setVisitedAndRecStackWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus){
+            if (orientation == '+'){
+                visitedPlus[v] = true;
+                recStackPlus[v] = true;
+            } else {
+                visitedMinus[v] = true;
+                recStackMinus[v] = true;
+            }
+        }
+
         bool isCyclicUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visiteMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus){
             //cout << "Visiting: " << v << " " << orientation << endl;
             if (!isSegmentVisitedWithOrientation(v, orientation, visitedPlus, visiteMinus)){
-                if (orientation == '+'){
-                    visitedPlus[v] = true;
-                    recStackPlus[v] = true;
-                } else {
-                    visiteMinus[v] = true;
-                    recStackMinus[v] = true;
-                }
+
+                setVisitedAndRecStackWithOrientation(v, orientation, visitedPlus, visiteMinus, recStackPlus, recStackMinus);
 
                 for (Link link : links[v]){
                     //cout << v << " Checking link: " << link.to << " oriented: " << link.toOrient << endl;
                     if (link.fromOrient == orientation){
                         if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visiteMinus) && isCyclicUtil(link.to, link.toOrient, visitedPlus, visiteMinus, recStackPlus, recStackMinus)){
-                            cout << "Cycle detected at segment: " << getSegmentName(v) << " " << orientation << " -> " << getSegmentName(link.to) << " " << link.toOrient << endl;
+                            //cout << "Cycle detected at segment: " << getSegmentName(v) << " " << orientation << " -> " << getSegmentName(link.to) << " " << link.toOrient << endl;
                             return true;
                         } 
                         else {
-                            if (link.toOrient == '+' && recStackPlus[link.to]){
-                                cout << "Cycle detected at segment: " << getSegmentName(v) << " " << orientation << " -> " << getSegmentName(link.to) << " " << link.toOrient << endl;
-                                return true;
-                            }
-                            if (link.toOrient == '-' && recStackMinus[link.to]){
-                                cout << "Cycle detected at segment: " << getSegmentName(v) << " " << orientation << " -> " << getSegmentName(link.to) << " " << link.toOrient << endl;
+                            if ((link.toOrient == '+' && recStackPlus[link.to]) || (link.toOrient == '-' && recStackMinus[link.to])){
+                                //cout << "Cycle detected at segment: " << getSegmentName(v) << " " << orientation << " -> " << getSegmentName(link.to) << " " << link.toOrient << endl;
                                 return true;
                             }
                         }
@@ -134,7 +136,7 @@ class GfaGraph {
 
 
         bool isCyclic(){
-            cout << "Checking for cycles" << endl;
+            cout << "[+] Checking for cycles" << endl;
             vector<bool> visitedPlus(segments.size(), false);
             vector<bool> visitedMinus(segments.size(), false);
             vector<bool> recStackPlus(segments.size(), false);
@@ -152,6 +154,59 @@ class GfaGraph {
             }
             return false;
         }
+
+        void removeBackwardLinksUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus, vector<Link> &linksToRemove){
+            if (!isSegmentVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus)){
+
+                setVisitedAndRecStackWithOrientation(v, orientation, visitedPlus, visitedMinus, recStackPlus, recStackMinus);
+                
+                for (Link link : links[v]){
+                    if (link.fromOrient == orientation){
+                        if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visitedMinus)){
+                            removeBackwardLinksUtil(link.to, link.toOrient, visitedPlus, visitedMinus, recStackPlus, recStackMinus, linksToRemove);
+                        }
+                        if ( (recStackMinus[link.to] && link.toOrient == '-') || (recStackPlus[link.to] && link.toOrient == '+') ){
+                            linksToRemove.push_back(link);
+                            //cout << "Link da rimuovere: {" << link.from << ", " << link.fromOrient << "} -> {" << link.to << ", " << link.toOrient << "}\n";
+                        }
+                    }
+                }
+            }
+            if (orientation == '+'){
+                recStackPlus[v] = false;
+            } else {
+                recStackMinus[v] = false;
+            }
+        }
+
+
+        void removeBackwardLinks(){
+            vector<bool> visitedPlus(segments.size(), false);
+            vector<bool> visitedMinus(segments.size(), false);
+            vector<bool> recStackPlus(segments.size(), false);
+            vector<bool> recStackMinus(segments.size(), false);
+            vector<Link> linksToRemove;
+
+            for (Segment segment : segments){
+                if (!visitedPlus[segment.id]){
+                    removeBackwardLinksUtil(segment.id, '+', visitedPlus, visitedMinus, recStackPlus, recStackMinus, linksToRemove);
+                }
+                if (!visitedMinus[segment.id]){
+                    removeBackwardLinksUtil(segment.id, '-', visitedPlus, visitedMinus, recStackPlus, recStackMinus, linksToRemove);
+                }
+            }
+
+            //cout << "Links to remove: " << linksToRemove.size() << endl;
+            //cout << linksToRemove[linksToRemove.size()-1]->from << " " << linksToRemove[linksToRemove.size()-1]->fromOrient << " " << linksToRemove[linksToRemove.size()-1]->to << " " << linksToRemove[linksToRemove.size()-1]->toOrient << " " << linksToRemove[linksToRemove.size()-1]->overlap << endl;
+            for (const auto linkPtr : linksToRemove) {
+                cout << "Link da rimuovere: {" << getSegmentName(linkPtr.from) << ", " << linkPtr.fromOrient << "} -> {" << getSegmentName(linkPtr.to) << ", " << linkPtr.toOrient << "}\n";
+                // rimuovi
+                links[linkPtr.from].erase(std::remove_if(links[linkPtr.from].begin(), links[linkPtr.from].end(), [linkPtr](const Link& link) {
+                    return link.from == linkPtr.from && link.fromOrient == linkPtr.fromOrient && link.to == linkPtr.to && link.toOrient == linkPtr.toOrient && link.overlap == linkPtr.overlap;
+                }), links[linkPtr.from].end());
+            }
+        }
+        
 };
 
 
