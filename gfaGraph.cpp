@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <algorithm>
+#include <chrono>
 
 using namespace std;
 
@@ -15,8 +16,7 @@ struct Segment {
     string sequence;
 };
 
-struct Link
-{
+struct Link {
     int from;
     char fromOrient;
     int to;
@@ -32,12 +32,9 @@ class GfaGraph {
         vector<vector<Link>> links;
 
     public:
-        GfaGraph(){
+        GfaGraph(){}
+        ~GfaGraph(){}
 
-        }
-        ~GfaGraph(){
-
-        }
         void addSegment(Segment segment){
             segments.push_back(segment);
         }
@@ -136,7 +133,6 @@ class GfaGraph {
 
 
         bool isCyclic(){
-            cout << "[+] Checking for cycles" << endl;
             vector<bool> visitedPlus(segments.size(), false);
             vector<bool> visitedMinus(segments.size(), false);
             vector<bool> recStackPlus(segments.size(), false);
@@ -144,11 +140,11 @@ class GfaGraph {
 
             for (Segment segment : segments){
                 //cout << "Checking segment: " << segment.id << " oriented: "<< '+' << endl;
-                if (!visitedPlus[segment.id] && isCyclicUtil(segment.id, '+', visitedPlus, visitedMinus, recStackPlus, recStackMinus)){
+                if ( isCyclicUtil(segment.id, '+', visitedPlus, visitedMinus, recStackPlus, recStackMinus)){
                     return true;
                 }
                 //cout << "Checking segment: " << segment.id << " oriented: "<< '-' << endl;
-                if (!visitedMinus[segment.id] && isCyclicUtil(segment.id, '-', visitedPlus, visitedMinus, recStackPlus, recStackMinus)){
+                if ( isCyclicUtil(segment.id, '-', visitedPlus, visitedMinus, recStackPlus, recStackMinus)){
                     return true;
                 }
             }
@@ -181,6 +177,7 @@ class GfaGraph {
 
 
         void removeBackwardLinks(){
+            auto start = std::chrono::high_resolution_clock::now();
             vector<bool> visitedPlus(segments.size(), false);
             vector<bool> visitedMinus(segments.size(), false);
             vector<bool> recStackPlus(segments.size(), false);
@@ -188,25 +185,80 @@ class GfaGraph {
             vector<Link> linksToRemove;
 
             for (Segment segment : segments){
-                if (!visitedPlus[segment.id]){
                     removeBackwardLinksUtil(segment.id, '+', visitedPlus, visitedMinus, recStackPlus, recStackMinus, linksToRemove);
-                }
-                if (!visitedMinus[segment.id]){
                     removeBackwardLinksUtil(segment.id, '-', visitedPlus, visitedMinus, recStackPlus, recStackMinus, linksToRemove);
-                }
             }
 
             //cout << "Links to remove: " << linksToRemove.size() << endl;
             //cout << linksToRemove[linksToRemove.size()-1]->from << " " << linksToRemove[linksToRemove.size()-1]->fromOrient << " " << linksToRemove[linksToRemove.size()-1]->to << " " << linksToRemove[linksToRemove.size()-1]->toOrient << " " << linksToRemove[linksToRemove.size()-1]->overlap << endl;
             for (const auto linkPtr : linksToRemove) {
-                cout << "Link da rimuovere: {" << getSegmentName(linkPtr.from) << ", " << linkPtr.fromOrient << "} -> {" << getSegmentName(linkPtr.to) << ", " << linkPtr.toOrient << "}\n";
+                //cout << "Link da rimuovere: {" << getSegmentName(linkPtr.from) << ", " << linkPtr.fromOrient << "} -> {" << getSegmentName(linkPtr.to) << ", " << linkPtr.toOrient << "}\n";
                 // rimuovi
                 links[linkPtr.from].erase(std::remove_if(links[linkPtr.from].begin(), links[linkPtr.from].end(), [linkPtr](const Link& link) {
                     return link.from == linkPtr.from && link.fromOrient == linkPtr.fromOrient && link.to == linkPtr.to && link.toOrient == linkPtr.toOrient && link.overlap == linkPtr.overlap;
                 }), links[linkPtr.from].end());
             }
+            auto stop = std::chrono::high_resolution_clock::now();
+            auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+            cout << "Time taken by function: " << duration.count() << " milliseconds" << endl;
         }
         
+        vector<string> findDestinations(){
+            vector<string> destinations;
+            for ( Segment segment : segments){
+                if (links[segment.id].size() == 0){
+                    destinations.push_back(segment.name);
+                }
+            }
+            // print destinations
+            for (string destination : destinations){
+                cout << "Destination: " << destination << endl;
+            }
+            return destinations;
+        }
+
+        vector<string> findSources(){
+            vector<bool> isSource(segments.size(), true);
+            vector<string> sources;
+
+            for (Segment segment : segments){
+                for (Link link : links[segment.id]){
+                    isSource[link.to] = false;
+                }
+            }
+            for (int i = 0; i < isSource.size(); i++){
+                if (isSource[i]){
+                    sources.push_back(segments[i].name);
+                }
+            }
+            // print sources
+            for (string source : sources){
+                cout << "Source: " << source << endl;
+            }
+            return sources;
+        }
+
+        bool pathExistsUtil(int v, char orientation, int to, vector<bool> &visited){
+            if ( v == to){
+                return true;
+            }
+            visited[v] = true;
+            for (Link link : links[v]){
+                if (link.fromOrient == orientation){
+                    if (!visited[link.to] && pathExistsUtil(link.to, link.toOrient, to, visited)){
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        bool pathExists(string from, string to){
+            int fromId = segmentIndex[from];
+            int toId = segmentIndex[to];
+            vector<bool> visited(segments.size(), false);
+            return pathExistsUtil(fromId, '+', toId, visited) || pathExistsUtil(fromId, '-', toId, visited);
+        }
 };
 
 
