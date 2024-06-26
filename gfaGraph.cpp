@@ -193,8 +193,8 @@ bool GfaGraph::pathExistsUtil(int v, char orientation, int to, vector<bool> &vis
     setVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus, true);
     for (Link link : links[v]) {
         if (link.fromOrient == orientation) {
-            if (!isSegmentVisitedWithOrientation(v, link.toOrient, visitedPlus, visitedMinus) && pathExistsUtil(link.to, link.toOrient, to, visitedPlus, visitedMinus)) {
-                return true;
+            if ( !isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visitedMinus) ){
+                return pathExistsUtil(link.to, link.toOrient, to, visitedPlus, visitedMinus);
             }
         }
     }
