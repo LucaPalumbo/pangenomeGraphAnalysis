@@ -1,103 +1,82 @@
-#ifndef DATASETPARSER_CPP
-#define DATASETPARSER_CPP
+#include "datasetParser.hpp"
 
-#include <iostream>
-#include <fstream>
-#include <string>
-#include "gfaGraph.cpp"
+DatasetParser::DatasetParser(std::string filename) {
+    this->filename = filename;
+    openFile(filename);
+}
 
-using namespace std;
+DatasetParser::~DatasetParser() {
+    file.close();
+}
 
+void DatasetParser::openFile(std::string filename) {
+    file.open(filename);
+    if (!file.is_open()) {
+        std::cout << "Error: Impossible to open the file" << std::endl;
+        exit(1);
+    }
+}
 
-class DatasetParser {
-    private:
-        string filename;
-        ifstream file;
-    public:
-        DatasetParser(string filename){
-            this->filename = filename;
-            openFile(filename);
+GfaGraph* DatasetParser::parse() {
+    GfaGraph *graph = new GfaGraph();
+    char type;
+    std::string line;
+
+    while (getline(file, line)) {
+        type = line[0];
+        switch (type) {
+            case 'H':
+                handleHeader(line);
+                break;
+            case 'S':
+                handleSegment(graph, line);
+                break;
+            case 'L':
+                handleLink(graph, line);
+                break;
+            default:
+                break;
         }
-        ~DatasetParser(){
-            file.close();
-        }
+    }
+    return graph;
+}
 
-        void openFile(string filename){
-            file.open(filename);
-            if (!file.is_open()){
-                cout << "Error: Impossible to open the file" << endl;
-                exit(1);
-            }
-        }
+void DatasetParser::handleHeader(std::string line) {
+    // Handle the header line
+}
 
-        GfaGraph* parse(){
-            GfaGraph *graph = new GfaGraph();
-            char type;
-            string line;
+void DatasetParser::handleSegment(GfaGraph *graph, std::string line) {
+    std::vector<std::string> data = split(line, '\t');
+    std::string name = data[1];
+    std::string sequence = data[2];
+    graph->addSegment(name, sequence);
+}
 
-            while ( getline(file, line) ) {
-                type = line[0];
-                switch (type){
-                    case 'H':
-                        handleHeader(line);
-                        break;
-                    case 'S':
-                        handleSegment(graph, line);
-                        break;     
-                    case 'L':
-                        handleLink(graph, line);
-                        break;
-                    default:
-                        break;
-                }
-            }
-            return graph;
-        }
+void DatasetParser::handleLink(GfaGraph *graph, std::string line) {
+    std::vector<std::string> data = split(line, '\t');
+    if (data.size() != 6) {
+        std::cout << "Error: Invalid link line" << std::endl;
+        exit(1);
+    }
+    std::string from = data[1];
+    std::string fromOrient = data[2];
+    std::string to = data[3];
+    std::string toOrient = data[4];
+    std::string overlap = data[5];
+    graph->addLink(from, fromOrient[0], to, toOrient[0], overlap);
+}
 
-        void handleHeader(string line){
-            //cout << "Header: " << line << endl;
-        }
-        void handleSegment(GfaGraph *graph, string line){
-            vector<string> data = split(line, '\t');
-            /*if (data.size() != 3){
-                cout << "Error: Invalid segment line" << endl;
-                cout << line << endl;
-                exit(1);
-            }*/
-            string name = data[1];
-            string sequence = data[2];
-            graph->addSegment(name, sequence);
-
-        }
-        void handleLink(GfaGraph *graph, string line){
-            vector<string> data = split(line, '\t');
-            if (data.size() != 6){
-                cout << "Error: Invalid link line" << endl;
-                exit(1);
-            }
-            string from = data[1];
-            string fromOrient = data[2];
-            string to = data[3];
-            string toOrient = data[4];
-            string overlap = data[5];
-            graph->addLink(from, fromOrient[0], to, toOrient[0], overlap);
-
-        }
-
-        vector<string> split(string line, char delimiter){
-            vector<string> tokens;
-            string token;
-            for (char c : line){
-                if (c == delimiter){
-                    tokens.push_back(token);
-                    token = "";
-                } else {
-                    token += c;
-                }
-            }
+std::vector<std::string> DatasetParser::split(std::string line, char delimiter) {
+    std::vector<std::string> tokens;
+    std::string token;
+    for (char c : line) {
+        if (c == delimiter) {
             tokens.push_back(token);
-            return tokens;
+            token = "";
+        } else {
+            token += c;
         }
-};
-
-#endif
+    }
+    tokens.push_back(token);
+    return tokens;
+}
