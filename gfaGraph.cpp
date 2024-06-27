@@ -19,6 +19,10 @@ void GfaGraph::addSegment(string name, string sequence) {
 }
 
 void GfaGraph::addLink(string from, char fromOrient, string to, char toOrient, string overlap) {
+    //if (from == "51804"){
+    //    cout << "DEBUG"<< endl;
+    //    cout << "Link: " << from << " " << fromOrient << " " << to << " " << toOrient << " " << overlap << endl;
+    //}
     Link link;
     link.from = segmentIndex[from];
     link.fromOrient = fromOrient;
@@ -45,7 +49,7 @@ void GfaGraph::printLinks() {
 void GfaGraph::printLinks(string segmentName) {
     int segmentId = segmentIndex[segmentName];
     for (Link link : links[segmentId]) {
-        cout << "Link: " << segmentId << " " << link.fromOrient << " " << link.to << " " << link.toOrient << " " << link.overlap << endl;
+        cout << "Link: " << getSegmentName(segmentId) << " " << link.fromOrient << " " << getSegmentName(link.to) << " " << link.toOrient << " " << link.overlap << endl;
     }
 }
 
@@ -160,9 +164,9 @@ vector<string> GfaGraph::findDestinations() {
             destinations.push_back(segment.name);
         }
     }
-    for (string destination : destinations) {
-        cout << "Destination: " << destination << endl;
-    }
+    //for (string destination : destinations) {
+    //    cout << "Destination: " << destination << endl;
+    //}
     return destinations;
 }
 
@@ -193,8 +197,8 @@ bool GfaGraph::pathExistsUtil(int v, char orientation, int to, vector<bool> &vis
     setVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus, true);
     for (Link link : links[v]) {
         if (link.fromOrient == orientation) {
-            if ( !isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visitedMinus) ){
-                return pathExistsUtil(link.to, link.toOrient, to, visitedPlus, visitedMinus);
+            if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visitedMinus) && pathExistsUtil(link.to, link.toOrient, to, visitedPlus, visitedMinus)  ){
+                return true;
             }
         }
     }
@@ -211,7 +215,11 @@ bool GfaGraph::pathExists(string from, string to) {
 
 
 
-void GfaGraph::findNPathUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n) {
+void GfaGraph::findNPathsUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n) {
+
+    if (paths.size() >= n) {
+        return;
+    }
 
     setVisitedWithOrientation(from, orientation, recStackPlus, recStackMinus, true);
     currentPath.segments.push_back(getSegmentName(from));
@@ -224,7 +232,7 @@ void GfaGraph::findNPathUtil(int from, char orientation, int to, vector<Path> &p
     else if (currentPath.segments.size() < maxLen) {
         for (Link link: links[from]) {
             if (link.fromOrient == orientation) {
-                findNPathUtil(link.to, link.toOrient, to, paths, currentPath, recStackPlus, recStackMinus, maxLen, n);
+                findNPathsUtil(link.to, link.toOrient, to, paths, currentPath, recStackPlus, recStackMinus, maxLen, n);
             }
         }
     }
@@ -235,8 +243,8 @@ void GfaGraph::findNPathUtil(int from, char orientation, int to, vector<Path> &p
 
 }
 
-vector<Path> GfaGraph::findNPath(string from, string to, int n) {
-    int maxLen = 10;
+vector<Path> GfaGraph::findNPaths(string from, string to, int n) {
+    int maxLen = 2147483647; // long max
     int fromId = segmentIndex[from];
     int toId = segmentIndex[to];
 
@@ -245,8 +253,8 @@ vector<Path> GfaGraph::findNPath(string from, string to, int n) {
     vector<bool> recStackPlus(segments.size(), false);
     vector<bool> recStackMinus(segments.size(), false);
 
-    findNPathUtil(fromId, '+', toId, paths, currentPath, recStackPlus, recStackMinus, maxLen, n);
-    findNPathUtil(fromId, '-', toId, paths, currentPath, recStackPlus, recStackMinus, maxLen, n);
+    findNPathsUtil(fromId, '+', toId, paths, currentPath, recStackPlus, recStackMinus, maxLen, n);
+    findNPathsUtil(fromId, '-', toId, paths, currentPath, recStackPlus, recStackMinus, maxLen, n);
 
     return paths;
 }

@@ -4,17 +4,29 @@
 
 using namespace std;
 
+void interaction(GfaGraph* g){
+    while ( true ){
+        string seg;
+        cin >> seg;
+        cout << endl;
+        g->printLinks(seg);
+    }
+}
+
+
+
 int main() {
-    DatasetParser parser("datasets/example.gfa");
+    //DatasetParser parser("datasets/example.gfa");
     //DatasetParser parser("datasets/dataset1.gfa");
-    //DatasetParser parser("datasets/build5.gfa");
-    //DatasetParser parser("datasets/chrY.hprc-v1.0-pggb.gfa");
+    //DatasetParser parser("datasets/build1.gfa");
+    DatasetParser parser("datasets/chrY.hprc-v1.0-pggb.gfa");
     //DatasetParser parser("datasets/chrX.hprc-v1.0-pggb.gfa");
     //DatasetParser parser("datasets/example2var.gfa");
 
     cout << "[+] Parsing graph" << endl;
-    GfaGraph *graph = parser.parse();
+    GfaGraph *graph = parser.parse2();
     cout << "[+] Graph parsed" << endl;
+
 
 
     if (graph->isCyclic()){
@@ -27,13 +39,49 @@ int main() {
     }
 
 
-    vector<string> sources =  graph->findSources();
-    vector<string> dests =  graph->findDestinations();
-    if (graph->pathExists(sources[0], dests[0])){
-        cout << "Path from " << sources[0] << " to " << dests[0] << " exists" << endl;
-    } else {
-        cout << "Path from " << sources[0] << " to " << dests[0] << " does not exist" << endl;
-    }
+
+
+    //vector<string> sources =  graph->findSources();
+    //vector<string> dests =  graph->findDestinations();
+
+
+    string s = "45560";
+    string d = "45567";
+    //interaction(graph);
+
+    cout <<  graph->pathExists(s, d) << endl;
+
+    //vector<string> dests =  graph->findDestinations();
+    //string d = "45567";
+    //d = "51804";
+    //graph->printLinks(s);
+    //cout << graph->pathExists(s, d) << endl;
+
+
+    //cout << graph->pathExists(s, d) << endl;
+    //for (string source : sources) {
+    //    for (string dest : dests) {
+    //        //cout << "Destination: " << dest << endl;
+    //        if (graph->pathExists(source, dest)){
+    //            cout << "Path from " << source << " to " << dest << " exists" << endl;
+    //            d = dest;
+    //            s = source;
+    //        } else {
+    //            //cout << "Path from " << sources[0] << " to " << dest << " does not exist" << endl;
+    //        }
+    //    }
+    //}
+
+    //vector<Path> paths =  graph->findNPaths(s, d, 5);
+    //for (Path path : paths) {
+    //    cout << "Path from " << path.from << " to " << path.to << " with segments: ";
+    //    for (int i = 0; i < path.segments.size(); i++) {
+    //        cout << path.segments[i] << path.orientations[i];
+    //        if (i < path.segments.size() - 1)
+    //            cout << " -> ";
+    //    }
+    //    cout << endl;
+    //}
 
 
     delete graph;

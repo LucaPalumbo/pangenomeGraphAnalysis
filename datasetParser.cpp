@@ -17,6 +17,10 @@ void DatasetParser::openFile(std::string filename) {
     }
 }
 
+void DatasetParser::closeFile() {
+    file.close();
+}
+
 GfaGraph* DatasetParser::parse() {
     GfaGraph *graph = new GfaGraph();
     char type;
@@ -39,6 +43,34 @@ GfaGraph* DatasetParser::parse() {
         }
     }
     return graph;
+}
+
+GfaGraph* DatasetParser::parse2(){
+    GfaGraph *graph = new GfaGraph();
+    readSegments(graph);
+    file.clear();
+    file.seekg(0);
+    readLinks(graph);
+    return graph;
+}
+
+void DatasetParser::readSegments(GfaGraph *graph) {
+    std::string line;
+    while (getline(file, line)) {
+        if (line[0] == 'S') {
+            handleSegment(graph, line);
+        }
+    }
+}
+
+void DatasetParser::readLinks(GfaGraph *graph){
+    std::string line;
+    while (getline(file, line)) {
+        if (line[0] == 'L') {
+            handleLink(graph, line);
+        }
+    }
+
 }
 
 void DatasetParser::handleHeader(std::string line) {

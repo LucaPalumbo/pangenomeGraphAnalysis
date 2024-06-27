@@ -16,7 +16,11 @@ class DatasetParser {
         ~DatasetParser();
 
         void openFile(std::string filename);
+        void closeFile();
         GfaGraph* parse();
+        GfaGraph* parse2();
+        void readSegments(GfaGraph *graph);
+        void readLinks(GfaGraph *graph);
         void handleHeader(std::string line);
         void handleSegment(GfaGraph *graph, std::string line);
         void handleLink(GfaGraph *graph, std::string line);

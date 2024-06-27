@@ -40,8 +40,8 @@ class GfaGraph {
         vector<string> findSources();
         bool pathExistsUtil(int v, char orientation, int to, vector<bool> &visitedPlus, vector<bool> &visitedMinus);
         bool pathExists(string from, string to);
-        vector<Path> findNPath(string from, string to, int n);
-        void findNPathUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n);
+        vector<Path> findNPaths(string from, string to, int n);
+        void findNPathsUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n);
 };
 
 #endif
