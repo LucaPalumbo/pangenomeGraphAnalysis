@@ -9,22 +9,22 @@
 
 class DatasetParser {
     private:
-        std::string filename;
-        std::ifstream file;
+        string filename;
+        ifstream file;
     public:
-        DatasetParser(std::string filename);
+        DatasetParser(string filename);
         ~DatasetParser();
 
-        void openFile(std::string filename);
+        void openFile(string filename);
         void closeFile();
         GfaGraph* parse();
         GfaGraph* parse2();
         void readSegments(GfaGraph *graph);
         void readLinks(GfaGraph *graph);
-        void handleHeader(std::string line);
-        void handleSegment(GfaGraph *graph, std::string line);
-        void handleLink(GfaGraph *graph, std::string line);
-        std::vector<std::string> split(std::string line, char delimiter);
+        void handleHeader(string line);
+        void handleSegment(GfaGraph *graph, string line);
+        void handleLink(GfaGraph *graph, string line);
+        vector<string> split(string line, char delimiter);
 };
 
 #endif

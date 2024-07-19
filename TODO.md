@@ -1,6 +1,5 @@
 
 
-finisci di implementare la parte facoltativa
 
 togli da ovunque gli std::
 
