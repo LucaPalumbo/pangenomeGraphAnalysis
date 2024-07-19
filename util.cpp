@@ -23,9 +23,3 @@ void getSDPairs(GfaGraph* graph){
     }
 }
 
-
-bool isKmer(string sequence, Path path){
-    string pathSeq = path.getSequence();
-    return true;
-
-}

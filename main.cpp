@@ -57,7 +57,7 @@ int main() {
     //}
 
     KarpRabin kr(4, 101);
-    string pattern = "ACGT";
+    string pattern = "AAATTATAG";
     string sequence;
     for( Path path: paths){
         sequence = path.getSequence();
