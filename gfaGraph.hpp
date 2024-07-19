@@ -7,7 +7,9 @@
 #include <unordered_map>
 #include <algorithm>
 #include <chrono>
-#include "structures.hpp"
+#include "segment.hpp"
+#include "link.hpp"
+#include "path.hpp"
 
 using namespace std;
 

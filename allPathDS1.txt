@@ -1,0 +1,60 @@
+[+] Parsing graph
+[+] Graph parsed
+The graph is cyclic
+[+] Removing backward links
+Links to remove: 31
+Time taken by function: 3 milliseconds
+Path from 1 to 979 YES
+Path from 1 to 1417 YES
+Path from 1 to 2437 YES
+Path from 1 to 2493 YES
+Path from 1 to 2526 YES
+Path from 1 to 2574 YES
+Path from 1 to 2972 YES
+Path from 1 to 3085 YES
+Path from 1 to 3204 YES
+Path from 1418 to 979 YES
+Path from 1418 to 1417 YES
+Path from 1418 to 2437 YES
+Path from 1418 to 2493 YES
+Path from 1418 to 2526 YES
+Path from 1418 to 2574 YES
+Path from 1418 to 2972 YES
+Path from 1418 to 3085 YES
+Path from 1418 to 3204 YES
+Path from 2221 to 979 YES
+Path from 2221 to 1417 YES
+Path from 2221 to 2437 YES
+Path from 2221 to 2493 YES
+Path from 2221 to 2526 YES
+Path from 2221 to 2574 YES
+Path from 2221 to 2972 YES
+Path from 2221 to 3085 YES
+Path from 2221 to 3204 YES
+Path from 2901 to 979 YES
+Path from 2901 to 1417 YES
+Path from 2901 to 2437 YES
+Path from 2901 to 2493 YES
+Path from 2901 to 2526 YES
+Path from 2901 to 2574 YES
+Path from 2901 to 2972 YES
+Path from 2901 to 3085 YES
+Path from 2901 to 3204 YES
+Path from 3205 to 979 YES
+Path from 3205 to 1417 NO
+Path from 3205 to 2437 NO
+Path from 3205 to 2493 NO
+Path from 3205 to 2526 NO
+Path from 3205 to 2574 NO
+Path from 3205 to 2972 NO
+Path from 3205 to 3085 NO
+Path from 3205 to 3204 NO
+Path from 3211 to 979 YES
+Path from 3211 to 1417 YES
+Path from 3211 to 2437 YES
+Path from 3211 to 2493 YES
+Path from 3211 to 2526 YES
+Path from 3211 to 2574 YES
+Path from 3211 to 2972 YES
+Path from 3211 to 3085 YES
+Path from 3211 to 3204 YES

@@ -1,6 +1,7 @@
 #include <iostream>
 #include "gfaGraph.hpp"
 #include "datasetParser.hpp"
+#include "karpRabin.hpp"
 
 using namespace std;
 
@@ -15,11 +16,13 @@ void interaction(GfaGraph* g){
 
 
 
+
+
 int main() {
     //DatasetParser parser("datasets/example.gfa");
-    //DatasetParser parser("datasets/dataset1.gfa");
+    DatasetParser parser("datasets/dataset1.gfa");
     //DatasetParser parser("datasets/build1.gfa");
-    DatasetParser parser("datasets/chrY.hprc-v1.0-pggb.gfa");
+    //DatasetParser parser("datasets/chrY.hprc-v1.0-pggb.gfa");
     //DatasetParser parser("datasets/chrX.hprc-v1.0-pggb.gfa");
     //DatasetParser parser("datasets/example2var.gfa");
 
@@ -39,49 +42,29 @@ int main() {
     }
 
 
+    //getSDPairs(graph);
 
-
-    //vector<string> sources =  graph->findSources();
-    //vector<string> dests =  graph->findDestinations();
-
-
-    string s = "45560";
-    string d = "45567";
-    //interaction(graph);
-
-    cout <<  graph->pathExists(s, d) << endl;
-
-    //vector<string> dests =  graph->findDestinations();
-    //string d = "45567";
-    //d = "51804";
-    //graph->printLinks(s);
-    //cout << graph->pathExists(s, d) << endl;
-
-
-    //cout << graph->pathExists(s, d) << endl;
-    //for (string source : sources) {
-    //    for (string dest : dests) {
-    //        //cout << "Destination: " << dest << endl;
-    //        if (graph->pathExists(source, dest)){
-    //            cout << "Path from " << source << " to " << dest << " exists" << endl;
-    //            d = dest;
-    //            s = source;
-    //        } else {
-    //            //cout << "Path from " << sources[0] << " to " << dest << " does not exist" << endl;
-    //        }
-    //    }
-    //}
-
-    //vector<Path> paths =  graph->findNPaths(s, d, 5);
+    string source  = "1";
+    string destination = "3204";
+    //cout << "Path from " << source << " to " << destination << " exists: " << graph->pathExists(source, destination) << endl;
+    
+    vector<Path> paths = graph->findNPaths(source, destination, 42);
+    //int i = 0;
     //for (Path path : paths) {
-    //    cout << "Path from " << path.from << " to " << path.to << " with segments: ";
-    //    for (int i = 0; i < path.segments.size(); i++) {
-    //        cout << path.segments[i] << path.orientations[i];
-    //        if (i < path.segments.size() - 1)
-    //            cout << " -> ";
-    //    }
+    //    cout << "Path: " << i++ << endl;
+    //    path.printPath();
     //    cout << endl;
     //}
+
+    KarpRabin kr(4, 101);
+    string pattern = "ACGT";
+    string sequence;
+    for( Path path: paths){
+        sequence = path.getSequence();
+        cout << "Sequence: " << sequence << endl;
+        cout << "Pattern: " << pattern << endl;
+        cout << "Pattern found: " << kr.run(sequence, pattern) << endl;
+    }
 
 
     delete graph;

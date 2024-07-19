@@ -216,13 +216,12 @@ bool GfaGraph::pathExists(string from, string to) {
 
 
 void GfaGraph::findNPathsUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n) {
-
     if (paths.size() >= n) {
         return;
     }
 
     setVisitedWithOrientation(from, orientation, recStackPlus, recStackMinus, true);
-    currentPath.segments.push_back(getSegmentName(from));
+    currentPath.segments.push_back(segments[from]);
     currentPath.orientations.push_back(orientation);
 
 

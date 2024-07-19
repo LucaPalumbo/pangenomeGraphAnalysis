@@ -1,0 +1,11 @@
+
+
+finisci di implementare la parte facoltativa
+
+togli da ovunque gli std::
+
+rinomina gfaGraph in pangenomeGraph
+
+rendere alcuni metodi privati 
+
+controlla i nomi delle varibili ovunque
