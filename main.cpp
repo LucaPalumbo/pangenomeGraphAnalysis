@@ -1,11 +1,11 @@
 #include <iostream>
-#include "gfaGraph.hpp"
+#include "pangenomeGraph.hpp"
 #include "datasetParser.hpp"
 #include "karpRabin.hpp"
 
 using namespace std;
 
-void interaction(GfaGraph* g){
+void interaction(PangenomeGraph* g){
     while ( true ){
         string seg;
         cin >> seg;
@@ -27,7 +27,7 @@ int main() {
     //DatasetParser parser("datasets/example2var.gfa");
 
     cout << "[+] Parsing graph" << endl;
-    GfaGraph *graph = parser.parse2();
+    PangenomeGraph *graph = parser.parse2();
     cout << "[+] Graph parsed" << endl;
 
 

@@ -1,13 +1,13 @@
 #include <string>
 #include <iostream>
 #include "path.hpp"
-#include "gfaGraph.hpp"
+#include "pangenomeGraph.hpp"
 
 
 using namespace std;
 
 
-void getSDPairs(GfaGraph* graph){
+void getSDPairs(PangenomeGraph* graph){
     // than save to files
     vector<string> sources =  graph->findSources();
     vector<string> dests =  graph->findDestinations();

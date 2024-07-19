@@ -23,8 +23,8 @@ void DatasetParser::closeFile() {
     file.close();
 }
 
-GfaGraph* DatasetParser::parse() {
-    GfaGraph *graph = new GfaGraph();
+PangenomeGraph* DatasetParser::parse() {
+    PangenomeGraph *graph = new PangenomeGraph();
     char type;
     string line;
 
@@ -47,8 +47,8 @@ GfaGraph* DatasetParser::parse() {
     return graph;
 }
 
-GfaGraph* DatasetParser::parse2(){
-    GfaGraph *graph = new GfaGraph();
+PangenomeGraph* DatasetParser::parse2(){
+    PangenomeGraph *graph = new PangenomeGraph();
     readSegments(graph);
     file.clear();
     file.seekg(0);
@@ -56,7 +56,7 @@ GfaGraph* DatasetParser::parse2(){
     return graph;
 }
 
-void DatasetParser::readSegments(GfaGraph *graph) {
+void DatasetParser::readSegments(PangenomeGraph *graph) {
     string line;
     while (getline(file, line)) {
         if (line[0] == 'S') {
@@ -65,7 +65,7 @@ void DatasetParser::readSegments(GfaGraph *graph) {
     }
 }
 
-void DatasetParser::readLinks(GfaGraph *graph){
+void DatasetParser::readLinks(PangenomeGraph *graph){
     string line;
     while (getline(file, line)) {
         if (line[0] == 'L') {
@@ -79,14 +79,14 @@ void DatasetParser::handleHeader(string line) {
     // Handle the header line
 }
 
-void DatasetParser::handleSegment(GfaGraph *graph, string line) {
+void DatasetParser::handleSegment(PangenomeGraph *graph, string line) {
     vector<string> data = split(line, '\t');
     string name = data[1];
     string sequence = data[2];
     graph->addSegment(name, sequence);
 }
 
-void DatasetParser::handleLink(GfaGraph *graph, string line) {
+void DatasetParser::handleLink(PangenomeGraph *graph, string line) {
     vector<string> data = split(line, '\t');
     if (data.size() != 6) {
         cout << "Error: Invalid link line" << endl;

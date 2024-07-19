@@ -5,7 +5,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "gfaGraph.hpp"
+#include "pangenomeGraph.hpp"
 
 class DatasetParser {
     private:
@@ -17,13 +17,13 @@ class DatasetParser {
 
         void openFile(string filename);
         void closeFile();
-        GfaGraph* parse();
-        GfaGraph* parse2();
-        void readSegments(GfaGraph *graph);
-        void readLinks(GfaGraph *graph);
+        PangenomeGraph* parse();
+        PangenomeGraph* parse2();
+        void readSegments(PangenomeGraph *graph);
+        void readLinks(PangenomeGraph *graph);
         void handleHeader(string line);
-        void handleSegment(GfaGraph *graph, string line);
-        void handleLink(GfaGraph *graph, string line);
+        void handleSegment(PangenomeGraph *graph, string line);
+        void handleLink(PangenomeGraph *graph, string line);
         vector<string> split(string line, char delimiter);
 };
 

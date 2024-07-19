@@ -1,5 +1,5 @@
-#ifndef GFAGRAPH_HPP
-#define GFAGRAPH_HPP
+#ifndef PANGENOMEGRAPH_HPP
+#define PANGENOMEGRAPH_HPP
 
 #include <iostream>
 #include <string>
@@ -15,15 +15,15 @@ using namespace std;
 
 
 
-class GfaGraph {
+class PangenomeGraph {
     private:
         vector<Segment> segments;
         unordered_map<string, int> segmentIndex;
         vector<vector<Link>> links;
 
     public:
-        GfaGraph();
-        ~GfaGraph();
+        PangenomeGraph();
+        ~PangenomeGraph();
 
         void addSegment(Segment segment);
         void addSegment(string name, string sequence);

@@ -1,14 +1,14 @@
-#include "gfaGraph.hpp"
+#include "pangenomeGraph.hpp"
 
-GfaGraph::GfaGraph() {}
+PangenomeGraph::PangenomeGraph() {}
 
-GfaGraph::~GfaGraph() {}
+PangenomeGraph::~PangenomeGraph() {}
 
-void GfaGraph::addSegment(Segment segment) {
+void PangenomeGraph::addSegment(Segment segment) {
     segments.push_back(segment);
 }
 
-void GfaGraph::addSegment(string name, string sequence) {
+void PangenomeGraph::addSegment(string name, string sequence) {
     Segment segment;
     segment.id = segments.size();
     segment.name = name;
@@ -18,7 +18,7 @@ void GfaGraph::addSegment(string name, string sequence) {
     links.push_back(vector<Link>());
 }
 
-void GfaGraph::addLink(string from, char fromOrient, string to, char toOrient, string overlap) {
+void PangenomeGraph::addLink(string from, char fromOrient, string to, char toOrient, string overlap) {
     //if (from == "51804"){
     //    cout << "DEBUG"<< endl;
     //    cout << "Link: " << from << " " << fromOrient << " " << to << " " << toOrient << " " << overlap << endl;
@@ -32,13 +32,13 @@ void GfaGraph::addLink(string from, char fromOrient, string to, char toOrient, s
     links[segmentIndex[from]].push_back(link);
 }
 
-void GfaGraph::printSegments() {
+void PangenomeGraph::printSegments() {
     for (Segment segment : segments) {
         cout << "Segment: " << segment.id << " " << segment.name << " " << segment.sequence << endl;
     }
 }
 
-void GfaGraph::printLinks() {
+void PangenomeGraph::printLinks() {
     for (int i = 0; i < links.size(); i++) {
         for (Link link : links[i]) {
             cout << "Link: " << i << " " << link.fromOrient << " " << link.to << " " << link.toOrient << " " << link.overlap << endl;
@@ -46,18 +46,18 @@ void GfaGraph::printLinks() {
     }
 }
 
-void GfaGraph::printLinks(string segmentName) {
+void PangenomeGraph::printLinks(string segmentName) {
     int segmentId = segmentIndex[segmentName];
     for (Link link : links[segmentId]) {
         cout << "Link: " << getSegmentName(segmentId) << " " << link.fromOrient << " " << getSegmentName(link.to) << " " << link.toOrient << " " << link.overlap << endl;
     }
 }
 
-string GfaGraph::getSegmentName(int id) {
+string PangenomeGraph::getSegmentName(int id) {
     return segments[id].name;
 }
 
-bool GfaGraph::isSegmentVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus) {
+bool PangenomeGraph::isSegmentVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus) {
     if (orientation == '+') {
         return visitedPlus[v];
     } else {
@@ -66,7 +66,7 @@ bool GfaGraph::isSegmentVisitedWithOrientation(int v, char orientation, vector<b
 }
 
 
-void GfaGraph::setVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, bool value) {
+void PangenomeGraph::setVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, bool value) {
     if (orientation == '+') {
         visitedPlus[v] = value;
     } else {
@@ -74,7 +74,7 @@ void GfaGraph::setVisitedWithOrientation(int v, char orientation, vector<bool> &
     }
 }
 
-bool GfaGraph::isCyclicUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus) {
+bool PangenomeGraph::isCyclicUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus) {
     if (!isSegmentVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus)) {
         setVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus, true);
         setVisitedWithOrientation(v, orientation, recStackPlus, recStackMinus, true);
@@ -96,7 +96,7 @@ bool GfaGraph::isCyclicUtil(int v, char orientation, vector<bool> &visitedPlus, 
     return false;
 }
 
-bool GfaGraph::isCyclic() {
+bool PangenomeGraph::isCyclic() {
     vector<bool> visitedPlus(segments.size(), false);
     vector<bool> visitedMinus(segments.size(), false);
     vector<bool> recStackPlus(segments.size(), false);
@@ -113,7 +113,7 @@ bool GfaGraph::isCyclic() {
     return false;
 }
 
-void GfaGraph::removeBackwardLinksUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus, vector<Link> &linksToRemove) {
+void PangenomeGraph::removeBackwardLinksUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus, vector<Link> &linksToRemove) {
     if (!isSegmentVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus)) {
         setVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus, true);
         setVisitedWithOrientation(v, orientation, recStackPlus, recStackMinus, true);
@@ -132,7 +132,7 @@ void GfaGraph::removeBackwardLinksUtil(int v, char orientation, vector<bool> &vi
     setVisitedWithOrientation(v, orientation, recStackPlus, recStackMinus, false);
 }
 
-void GfaGraph::removeBackwardLinks() {
+void PangenomeGraph::removeBackwardLinks() {
     auto start = std::chrono::high_resolution_clock::now();
     vector<bool> visitedPlus(segments.size(), false);
     vector<bool> visitedMinus(segments.size(), false);
@@ -157,7 +157,7 @@ void GfaGraph::removeBackwardLinks() {
     cout << "Time taken by function: " << duration.count() << " milliseconds" << endl;
 }
 
-vector<string> GfaGraph::findDestinations() {
+vector<string> PangenomeGraph::findDestinations() {
     vector<string> destinations;
     for (Segment segment : segments) {
         if (links[segment.id].size() == 0) {
@@ -170,7 +170,7 @@ vector<string> GfaGraph::findDestinations() {
     return destinations;
 }
 
-vector<string> GfaGraph::findSources() {
+vector<string> PangenomeGraph::findSources() {
     vector<bool> isSource(segments.size(), true);
     vector<string> sources;
 
@@ -190,7 +190,7 @@ vector<string> GfaGraph::findSources() {
     return sources;
 }
 
-bool GfaGraph::pathExistsUtil(int v, char orientation, int to, vector<bool> &visitedPlus, vector<bool> &visitedMinus) {
+bool PangenomeGraph::pathExistsUtil(int v, char orientation, int to, vector<bool> &visitedPlus, vector<bool> &visitedMinus) {
     if (v == to) {
         return true;
     }
@@ -205,7 +205,7 @@ bool GfaGraph::pathExistsUtil(int v, char orientation, int to, vector<bool> &vis
     return false;
 }
 
-bool GfaGraph::pathExists(string from, string to) {
+bool PangenomeGraph::pathExists(string from, string to) {
     int fromId = segmentIndex[from];
     int toId = segmentIndex[to];
     vector<bool> visitedPlus(segments.size(), false);
@@ -215,7 +215,7 @@ bool GfaGraph::pathExists(string from, string to) {
 
 
 
-void GfaGraph::findNPathsUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n) {
+void PangenomeGraph::findNPathsUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n) {
     if (paths.size() >= n) {
         return;
     }
@@ -242,7 +242,7 @@ void GfaGraph::findNPathsUtil(int from, char orientation, int to, vector<Path> &
 
 }
 
-vector<Path> GfaGraph::findNPaths(string from, string to, int n) {
+vector<Path> PangenomeGraph::findNPaths(string from, string to, int n) {
     int maxLen = 2147483647; // long max
     int fromId = segmentIndex[from];
     int toId = segmentIndex[to];

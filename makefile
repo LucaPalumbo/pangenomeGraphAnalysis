@@ -2,6 +2,6 @@
 
 compile:
 	g++ -o main main.cpp \
-		gfaGraph.cpp datasetParser.cpp util.cpp path.cpp segment.cpp \
+		pangenomeGraph.cpp datasetParser.cpp util.cpp path.cpp segment.cpp \
 		karpRabin.cpp \
 		-O3
