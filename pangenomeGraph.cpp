@@ -72,13 +72,12 @@ void PangenomeGraph::setVisitedWithOrientation(int seg_id, char orientation, vec
     }
 }
 
-bool PangenomeGraph::isCyclicUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus) {
-    if (!isSegmentVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus)) {
-        setVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus, true);
-        setVisitedWithOrientation(v, orientation, recStackPlus, recStackMinus, true);
+bool PangenomeGraph::isCyclicUtil(int vertex, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus) {
+    if (!isSegmentVisitedWithOrientation(vertex, orientation, visitedPlus, visitedMinus)) {
+        setVisitedWithOrientation(vertex, orientation, visitedPlus, visitedMinus, true);
+        setVisitedWithOrientation(vertex, orientation, recStackPlus, recStackMinus, true);
 
-
-        for (Link link : links[v]) {
+        for (Link link : links[vertex]) {
             if (link.fromOrient == orientation) {
                 if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visitedMinus) && isCyclicUtil(link.to, link.toOrient, visitedPlus, visitedMinus, recStackPlus, recStackMinus)) {
                     return true;
@@ -90,7 +89,7 @@ bool PangenomeGraph::isCyclicUtil(int v, char orientation, vector<bool> &visited
             }
         }
     }
-    setVisitedWithOrientation(v, orientation, recStackPlus, recStackMinus, false);
+    setVisitedWithOrientation(vertex, orientation, recStackPlus, recStackMinus, false);
     return false;
 }
 
@@ -111,12 +110,12 @@ bool PangenomeGraph::isCyclic() {
     return false;
 }
 
-void PangenomeGraph::removeBackwardLinksUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus, vector<Link> &linksToRemove) {
-    if (!isSegmentVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus)) {
-        setVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus, true);
-        setVisitedWithOrientation(v, orientation, recStackPlus, recStackMinus, true);
+void PangenomeGraph::removeBackwardLinksUtil(int vertex, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus, vector<Link> &linksToRemove) {
+    if (!isSegmentVisitedWithOrientation(vertex, orientation, visitedPlus, visitedMinus)) {
+        setVisitedWithOrientation(vertex, orientation, visitedPlus, visitedMinus, true);
+        setVisitedWithOrientation(vertex, orientation, recStackPlus, recStackMinus, true);
 
-        for (Link link : links[v]) {
+        for (Link link : links[vertex]) {
             if (link.fromOrient == orientation) {
                 if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visitedMinus)) {
                     removeBackwardLinksUtil(link.to, link.toOrient, visitedPlus, visitedMinus, recStackPlus, recStackMinus, linksToRemove);
@@ -127,7 +126,7 @@ void PangenomeGraph::removeBackwardLinksUtil(int v, char orientation, vector<boo
             }
         }
     }
-    setVisitedWithOrientation(v, orientation, recStackPlus, recStackMinus, false);
+    setVisitedWithOrientation(vertex, orientation, recStackPlus, recStackMinus, false);
 }
 
 void PangenomeGraph::removeBackwardLinks() {
