@@ -1,5 +1,7 @@
 #include "pangenomeGraph.hpp"
 
+using namespace std;
+
 PangenomeGraph::PangenomeGraph() {}
 
 PangenomeGraph::~PangenomeGraph() {}
@@ -19,10 +21,6 @@ void PangenomeGraph::addSegment(string name, string sequence) {
 }
 
 void PangenomeGraph::addLink(string from, char fromOrient, string to, char toOrient, string overlap) {
-    //if (from == "51804"){
-    //    cout << "DEBUG"<< endl;
-    //    cout << "Link: " << from << " " << fromOrient << " " << to << " " << toOrient << " " << overlap << endl;
-    //}
     Link link;
     link.from = segmentIndex[from];
     link.fromOrient = fromOrient;
@@ -57,20 +55,20 @@ string PangenomeGraph::getSegmentName(int id) {
     return segments[id].name;
 }
 
-bool PangenomeGraph::isSegmentVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus) {
+bool PangenomeGraph::isSegmentVisitedWithOrientation(int seg_id, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus) {
     if (orientation == '+') {
-        return visitedPlus[v];
+        return visitedPlus[seg_id];
     } else {
-        return visitedMinus[v];
+        return visitedMinus[seg_id];
     }
 }
 
 
-void PangenomeGraph::setVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, bool value) {
+void PangenomeGraph::setVisitedWithOrientation(int seg_id, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, bool value) {
     if (orientation == '+') {
-        visitedPlus[v] = value;
+        visitedPlus[seg_id] = value;
     } else {
-        visitedMinus[v] = value;
+        visitedMinus[seg_id] = value;
     }
 }
 
@@ -164,9 +162,6 @@ vector<string> PangenomeGraph::findDestinations() {
             destinations.push_back(segment.name);
         }
     }
-    //for (string destination : destinations) {
-    //    cout << "Destination: " << destination << endl;
-    //}
     return destinations;
 }
 
@@ -184,9 +179,6 @@ vector<string> PangenomeGraph::findSources() {
             sources.push_back(segments[i].name);
         }
     }
-    //for (string source : sources) {
-    //    cout << "Source: " << source << endl;
-    //}
     return sources;
 }
 
@@ -257,3 +249,118 @@ vector<Path> PangenomeGraph::findNPaths(string from, string to, int n) {
 
     return paths;
 }
+
+struct Triple {
+    int first;
+    char second;
+    int third;
+
+    Triple(int f, char s, int t) : first(f), second(s), third(t) {}
+};
+
+// Definizione del comparatore
+struct CompareTriple {
+    bool operator()(const Triple& a, const Triple& b) {
+        return a.third > b.third;
+    }
+};
+
+
+Path PangenomeGraph::dijkstra(string from, char fromOrient, string to, char toOrient) {
+    // initialize single sources
+    int fromId = segmentIndex[from];
+    int toId = segmentIndex[to];
+    vector<int> distPlus(segments.size(), 2147483647-2); // long max
+    vector<int> distMinus(segments.size(), 2147483647-2 ); // long max
+    vector<int> prevPlus(segments.size(), -1);
+    vector<char> prevPlusOrient(segments.size(), ' ');
+    vector<int> prevMinus(segments.size(), -1);
+    vector<char> prevMinusOrient(segments.size(), ' ');
+    
+    if (fromOrient == '+') {
+        distPlus[fromId] = 0;
+    }
+    else {
+        distMinus[fromId] = 0;
+    } 
+
+    priority_queue<Triple, vector<Triple>, CompareTriple> pq;
+    pq.push( Triple(fromId, fromOrient, 0) );
+
+    for (Segment segment: segments){
+        pq.push( Triple(segment.id, '+', distPlus[segment.id]) );
+        pq.push( Triple(segment.id, '-', distMinus[segment.id]) );
+    }
+
+    
+    while (!pq.empty()){
+        int nodeId = pq.top().first;
+        char orient = pq.top().second;
+        int dist = pq.top().third;
+        pq.pop();
+
+        for( Link link : links[nodeId] ){
+            if (link.fromOrient == orient ){
+                if ( link.toOrient == '+' ){
+                    if ( distPlus[link.to] > dist + 1 ){
+                        distPlus[link.to] = dist + 1;
+                        prevPlus[link.to] = nodeId;
+                        prevPlusOrient[link.to] = orient;
+                        pq.push( Triple(link.to, '+', dist +1 ) );
+                    }
+                }
+                else{
+                    if (distMinus[link.to] > dist + 1){
+                        distMinus[link.to] = dist + 1;
+                        prevMinus[link.to] = nodeId;
+                        prevMinusOrient[link.to] = orient;
+                        pq.push( Triple(link.to, '-', dist + 1));
+                    }
+                }
+                
+            }
+        }
+    }
+
+
+    Path path;
+    path.from = from;
+    path.to = to;
+    vector<Segment> segs;
+    vector<char> orients;
+    segs.push_back(segments[segmentIndex[to]]);
+    orients.push_back(toOrient);
+
+    Segment currentNode = segments[segmentIndex[to]];
+    char currentOrient = toOrient;
+    Segment prevNode;
+    char prevOrient;
+
+    while (currentNode.id != fromId && currentNode.id != -1){
+        if (currentOrient == '+'){
+            prevNode = segments[ prevPlus[ currentNode.id ] ];
+            prevOrient = prevPlusOrient[ currentNode.id ];
+            segs.push_back( prevNode );
+            orients.push_back( prevOrient );
+            currentNode = prevNode;
+            currentOrient = prevOrient;
+        }
+        else{
+            prevNode = segments[ prevMinus[ currentNode.id ] ];
+            prevOrient = prevMinusOrient[ currentNode.id ];
+            segs.push_back( prevNode );
+            orients.push_back( prevOrient );
+            currentNode = prevNode;
+            currentOrient = prevOrient;
+        }
+
+    }
+
+    reverse(segs.begin(), segs.end());
+    reverse(orients.begin(), orients.end());
+    path.segments = segs;
+    path.orientations = orients;
+    return path;
+
+
+} 

@@ -4,4 +4,4 @@ compile:
 	g++ -o main main.cpp \
 		pangenomeGraph.cpp datasetParser.cpp util.cpp path.cpp segment.cpp \
 		karpRabin.cpp \
-		-O3
+		-g -O3

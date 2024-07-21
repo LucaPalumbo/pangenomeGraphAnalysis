@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <chrono>
 #include "segment.hpp"
+#include <queue>
 #include "link.hpp"
 #include "path.hpp"
 
@@ -45,6 +46,8 @@ class PangenomeGraph {
         vector<string> findSources();
         bool pathExists(string from, string to);
         vector<Path> findNPaths(string from, string to, int n);
+
+        Path dijkstra(string from, char fromOrient, string to, char toOrient);
 };
 
 #endif

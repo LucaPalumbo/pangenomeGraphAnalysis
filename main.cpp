@@ -5,22 +5,11 @@
 
 using namespace std;
 
-void interaction(PangenomeGraph* g){
-    while ( true ){
-        string seg;
-        cin >> seg;
-        cout << endl;
-        g->printLinks(seg);
-    }
-}
-
-
-
-
 
 int main() {
     //DatasetParser parser("datasets/example.gfa");
-    DatasetParser parser("datasets/dataset1.gfa");
+    //DatasetParser parser("datasets/dataset1.gfa");
+    DatasetParser parser("datasets/build7.gfa");
     //DatasetParser parser("datasets/build1.gfa");
     //DatasetParser parser("datasets/chrY.hprc-v1.0-pggb.gfa");
     //DatasetParser parser("datasets/chrX.hprc-v1.0-pggb.gfa");
@@ -29,8 +18,6 @@ int main() {
     cout << "[+] Parsing graph" << endl;
     PangenomeGraph *graph = parser.parse2();
     cout << "[+] Graph parsed" << endl;
-
-
 
     if (graph->isCyclic()){
         cout << "The graph is cyclic" << endl;
@@ -45,27 +32,30 @@ int main() {
     //getSDPairs(graph);
 
     string source  = "1";
-    string destination = "3204";
-    //cout << "Path from " << source << " to " << destination << " exists: " << graph->pathExists(source, destination) << endl;
-    
-    vector<Path> paths = graph->findNPaths(source, destination, 42);
-    //int i = 0;
-    //for (Path path : paths) {
-    //    cout << "Path: " << i++ << endl;
-    //    path.printPath();
-    //    cout << endl;
-    //}
+    string destination = "4";
 
-    KarpRabin kr(4, 101);
-    string pattern = "AAATTATAG";
-    string sequence;
-    for( Path path: paths){
-        sequence = path.getSequence();
-        cout << "Sequence: " << sequence << endl;
-        cout << "Pattern: " << pattern << endl;
-        cout << "Pattern found: " << kr.run(sequence, pattern) << endl;
+    if ( graph->pathExists(source, destination) ){
+        cout << "Path from " << source << " to " << destination << " exists" << endl;
+    } else {
+        cout << "Path from " << source << " to " << destination << " does not exist" << endl;
     }
-
+    vector<Path> paths = graph->findNPaths(source, destination, 1);
+    paths[0].printPath();
+    graph->dijkstra(source, '+', destination, '+').printPath();
+    //cout << "Path from " << source << " to " << destination << " exists: " << graph->pathExists(source, destination) << endl;
+    //
+    //vector<Path> paths = graph->findNPaths(source, destination, 42);
+    
+    //KarpRabin kr(4, 101);
+    //string pattern = "AAATTATAG";
+    //string sequence;
+    //for( Path path: paths){
+    //    sequence = path.getSequence();
+    //    cout << "Sequence: " << sequence << endl;
+    //    cout << "Pattern: " << pattern << endl;
+    //    cout << "Pattern found: " << kr.run(sequence, pattern) << endl;
+    //}
+    
 
     delete graph;
     return 0;
