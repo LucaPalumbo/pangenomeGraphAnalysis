@@ -16,7 +16,7 @@ int main() {
     //DatasetParser parser("datasets/example2var.gfa");
 
     cout << "[+] Parsing graph" << endl;
-    PangenomeGraph *graph = parser.parse2();
+    PangenomeGraph *graph = parser.parse();
     cout << "[+] Graph parsed" << endl;
 
     if (graph->isCyclic()){

@@ -64,24 +64,29 @@ bool PangenomeGraph::isSegmentVisitedWithOrientation(int seg_id, char orientatio
 }
 
 
-void PangenomeGraph::setVisitedWithOrientation(int seg_id, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, bool value) {
+void PangenomeGraph::setVectorWithOrientation(int seg_id, char orientation, vector<bool> &vectorPlus, vector<bool> &vectorMinus, bool value) {
     if (orientation == '+') {
-        visitedPlus[seg_id] = value;
+        vectorPlus[seg_id] = value;
     } else {
-        visitedMinus[seg_id] = value;
+        vectorMinus[seg_id] = value;
     }
 }
 
 bool PangenomeGraph::isCyclicUtil(int vertex, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus) {
     if (!isSegmentVisitedWithOrientation(vertex, orientation, visitedPlus, visitedMinus)) {
-        setVisitedWithOrientation(vertex, orientation, visitedPlus, visitedMinus, true);
-        setVisitedWithOrientation(vertex, orientation, recStackPlus, recStackMinus, true);
+        // Mark the current node as visited and part of recursion stack
+        setVectorWithOrientation(vertex, orientation, visitedPlus, visitedMinus, true);
+        setVectorWithOrientation(vertex, orientation, recStackPlus, recStackMinus, true);
 
         for (Link link : links[vertex]) {
+            // consider only links that start with the correct orientation
             if (link.fromOrient == orientation) {
+                // if node is not visited, then recurse on it
                 if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visitedMinus) && isCyclicUtil(link.to, link.toOrient, visitedPlus, visitedMinus, recStackPlus, recStackMinus)) {
                     return true;
-                } else {
+                } 
+                // if node is visited and is in the recursion stack, then there is a cycle
+                else {
                     if ((link.toOrient == '+' && recStackPlus[link.to]) || (link.toOrient == '-' && recStackMinus[link.to])) {
                         return true;
                     }
@@ -89,7 +94,8 @@ bool PangenomeGraph::isCyclicUtil(int vertex, char orientation, vector<bool> &vi
             }
         }
     }
-    setVisitedWithOrientation(vertex, orientation, recStackPlus, recStackMinus, false);
+    // if execution reaches here, then there is no cycle in this path, so remove the node from the recursion stack
+    setVectorWithOrientation(vertex, orientation, recStackPlus, recStackMinus, false);
     return false;
 }
 
@@ -112,21 +118,25 @@ bool PangenomeGraph::isCyclic() {
 
 void PangenomeGraph::removeBackwardLinksUtil(int vertex, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus, vector<Link> &linksToRemove) {
     if (!isSegmentVisitedWithOrientation(vertex, orientation, visitedPlus, visitedMinus)) {
-        setVisitedWithOrientation(vertex, orientation, visitedPlus, visitedMinus, true);
-        setVisitedWithOrientation(vertex, orientation, recStackPlus, recStackMinus, true);
+        // Mark the current node as visited and part of recursion stack
+        setVectorWithOrientation(vertex, orientation, visitedPlus, visitedMinus, true);
+        setVectorWithOrientation(vertex, orientation, recStackPlus, recStackMinus, true);
 
         for (Link link : links[vertex]) {
+            // consider only links that start with the correct orientation
             if (link.fromOrient == orientation) {
+                // if node is not visited, then recurse on it
                 if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visitedMinus)) {
                     removeBackwardLinksUtil(link.to, link.toOrient, visitedPlus, visitedMinus, recStackPlus, recStackMinus, linksToRemove);
                 }
+                // if node is visited and is in the recursion stack, then there is a cycle, so add the link to the list of links to remove
                 if ((recStackMinus[link.to] && link.toOrient == '-') || (recStackPlus[link.to] && link.toOrient == '+')) {
                     linksToRemove.push_back(link);
                 }
             }
         }
     }
-    setVisitedWithOrientation(vertex, orientation, recStackPlus, recStackMinus, false);
+    setVectorWithOrientation(vertex, orientation, recStackPlus, recStackMinus, false);
 }
 
 void PangenomeGraph::removeBackwardLinks() {
@@ -143,6 +153,8 @@ void PangenomeGraph::removeBackwardLinks() {
     }
 
     cout << "Links to remove: " << linksToRemove.size() << endl;
+
+    // complex line to remove links from the links vector
     for (const auto linkPtr : linksToRemove) {
         links[linkPtr.from].erase(std::remove_if(links[linkPtr.from].begin(), links[linkPtr.from].end(), [linkPtr](const Link& link) {
             return link.from == linkPtr.from && link.fromOrient == linkPtr.fromOrient && link.to == linkPtr.to && link.toOrient == linkPtr.toOrient && link.overlap == linkPtr.overlap;
@@ -155,6 +167,7 @@ void PangenomeGraph::removeBackwardLinks() {
 }
 
 vector<string> PangenomeGraph::findDestinations() {
+    // a destination has no outgoing links
     vector<string> destinations;
     for (Segment segment : segments) {
         if (links[segment.id].size() == 0) {
@@ -165,6 +178,7 @@ vector<string> PangenomeGraph::findDestinations() {
 }
 
 vector<string> PangenomeGraph::findSources() {
+    // a source has no incoming links
     vector<bool> isSource(segments.size(), true);
     vector<string> sources;
 
@@ -181,18 +195,20 @@ vector<string> PangenomeGraph::findSources() {
     return sources;
 }
 
-bool PangenomeGraph::pathExistsUtil(int v, char orientation, int to, vector<bool> &visitedPlus, vector<bool> &visitedMinus) {
-    if (v == to) {
+bool PangenomeGraph::pathExistsUtil(int vertex, char orientation, int to, vector<bool> &visitedPlus, vector<bool> &visitedMinus) {
+    // exit condition
+    if (vertex == to) {
         return true;
     }
-    setVisitedWithOrientation(v, orientation, visitedPlus, visitedMinus, true);
-    for (Link link : links[v]) {
+    setVectorWithOrientation(vertex, orientation, visitedPlus, visitedMinus, true);
+    for (Link link : links[vertex]) {
         if (link.fromOrient == orientation) {
             if (!isSegmentVisitedWithOrientation(link.to, link.toOrient, visitedPlus, visitedMinus) && pathExistsUtil(link.to, link.toOrient, to, visitedPlus, visitedMinus)  ){
                 return true;
             }
         }
     }
+    // if execution reaches here, then there is no path on this branch
     return false;
 }
 
@@ -207,15 +223,16 @@ bool PangenomeGraph::pathExists(string from, string to) {
 
 
 void PangenomeGraph::findNPathsUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n) {
+    // exit condition - if we have found n paths
     if (paths.size() >= n) {
         return;
     }
-
-    setVisitedWithOrientation(from, orientation, recStackPlus, recStackMinus, true);
+    // set recursion stack and push current vertex to path
+    setVectorWithOrientation(from, orientation, recStackPlus, recStackMinus, true);
     currentPath.segments.push_back(segments[from]);
     currentPath.orientations.push_back(orientation);
 
-
+    // if we have reached the destination, add the path to the list of paths
     if (from == to){
         paths.push_back(currentPath);
     }
@@ -226,10 +243,11 @@ void PangenomeGraph::findNPathsUtil(int from, char orientation, int to, vector<P
             }
         }
     }
-
+    // if execution reaches here, then there is no path on this branch
+    // remove the current vertex from the path and from the recursion stack
     currentPath.segments.pop_back();
     currentPath.orientations.pop_back();
-    setVisitedWithOrientation(from, orientation, recStackPlus, recStackMinus, false);
+    setVectorWithOrientation(from, orientation, recStackPlus, recStackMinus, false);
 
 }
 
@@ -248,6 +266,10 @@ vector<Path> PangenomeGraph::findNPaths(string from, string to, int n) {
 
     return paths;
 }
+
+
+
+//  --- extra ---
 
 struct Triple {
     int first;
@@ -360,6 +382,4 @@ Path PangenomeGraph::dijkstra(string from, char fromOrient, string to, char toOr
     path.segments = segs;
     path.orientations = orients;
     return path;
-
-
 } 

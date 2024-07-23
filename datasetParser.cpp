@@ -23,7 +23,7 @@ void DatasetParser::closeFile() {
     file.close();
 }
 
-PangenomeGraph* DatasetParser::parse() {
+PangenomeGraph* DatasetParser::parse2() {
     PangenomeGraph *graph = new PangenomeGraph();
     char type;
     string line;
@@ -47,7 +47,7 @@ PangenomeGraph* DatasetParser::parse() {
     return graph;
 }
 
-PangenomeGraph* DatasetParser::parse2(){
+PangenomeGraph* DatasetParser::parse(){
     PangenomeGraph *graph = new PangenomeGraph();
     readSegments(graph);
     file.clear();

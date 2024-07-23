@@ -7,13 +7,12 @@
 #include <unordered_map>
 #include <algorithm>
 #include <chrono>
-#include "segment.hpp"
 #include <queue>
 #include "link.hpp"
+#include "segment.hpp"
 #include "path.hpp"
 
 using namespace std;
-
 
 
 class PangenomeGraph {
@@ -27,7 +26,7 @@ class PangenomeGraph {
         bool pathExistsUtil(int v, char orientation, int to, vector<bool> &visitedPlus, vector<bool> &visitedMinus);
         void findNPathsUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n);
         bool isSegmentVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus);
-        void setVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, bool value);
+        void setVectorWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, bool value);
     
     public:
         PangenomeGraph();
