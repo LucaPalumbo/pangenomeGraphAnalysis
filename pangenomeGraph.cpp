@@ -7,7 +7,15 @@ PangenomeGraph::PangenomeGraph() {}
 PangenomeGraph::~PangenomeGraph() {}
 
 void PangenomeGraph::addSegment(Segment segment) {
+    // check that the segment is not already in the graph
+    if (segmentIndex.find(segment.name) != segmentIndex.end()) {
+        cout << "Segment " << segment.name << " already in the graph" << endl;
+        return;
+    }
+    segment.id = segments.size();
+    segmentIndex[segment.name] = segments.size();
     segments.push_back(segment);
+    links.push_back(vector<Link>());
 }
 
 void PangenomeGraph::addSegment(string name, string sequence) {
@@ -39,7 +47,7 @@ void PangenomeGraph::printSegments() {
 void PangenomeGraph::printLinks() {
     for (int i = 0; i < links.size(); i++) {
         for (Link link : links[i]) {
-            cout << "Link: " << i << " " << link.fromOrient << " " << link.to << " " << link.toOrient << " " << link.overlap << endl;
+            cout << "Link: " << getSegmentName(link.from) << " " << link.fromOrient << " " << getSegmentName(link.to) << " " << link.toOrient << " " << link.overlap << endl;
         }
     }
 }

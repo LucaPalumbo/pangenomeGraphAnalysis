@@ -5,6 +5,8 @@
 #include <vector>
 #include <string>
 
+using namespace std;
+
 struct Link {
     int from;
     char fromOrient;

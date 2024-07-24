@@ -5,3 +5,4 @@ allPathY.txt
 tests/
 boh.txt
 boh1.txt
+./*.py

@@ -17,18 +17,17 @@ using namespace std;
 
 class PangenomeGraph {
     private:
-        vector<Segment> segments;
-        unordered_map<string, int> segmentIndex;
-        vector<vector<Link>> links;
  
         bool isCyclicUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus);
         void removeBackwardLinksUtil(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, vector<bool> &recStackPlus, vector<bool> &recStackMinus, vector<Link> &linksToRemove);
         bool pathExistsUtil(int v, char orientation, int to, vector<bool> &visitedPlus, vector<bool> &visitedMinus);
         void findNPathsUtil(int from, char orientation, int to, vector<Path> &paths, Path &currentPath, vector<bool> &recStackPlus, vector<bool> &recStackMinus, int maxLen, int n);
-        bool isSegmentVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus);
-        void setVectorWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, bool value);
     
     public:
+        vector<Segment> segments;
+        unordered_map<string, int> segmentIndex;
+        vector<vector<Link>> links;
+        
         PangenomeGraph();
         ~PangenomeGraph();
 
@@ -45,6 +44,8 @@ class PangenomeGraph {
         vector<string> findSources();
         bool pathExists(string from, string to);
         vector<Path> findNPaths(string from, string to, int n);
+        bool isSegmentVisitedWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus);
+        void setVectorWithOrientation(int v, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus, bool value);
 
         Path dijkstra(string from, char fromOrient, string to, char toOrient);
 };
