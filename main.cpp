@@ -10,7 +10,7 @@ using namespace std;
 int main() {
     //DatasetParser parser("datasets/example.gfa");
     DatasetParser parser("datasets/dataset1.gfa");
-    //DatasetParser parser("datasets/build7.gfa");
+    //DatasetParser parser("datasets/build8.gfa");
     //DatasetParser parser("datasets/build1.gfa");
     //DatasetParser parser("datasets/chrY.hprc-v1.0-pggb.gfa");
     //DatasetParser parser("datasets/chrX.hprc-v1.0-pggb.gfa");
@@ -20,18 +20,18 @@ int main() {
     PangenomeGraph *graph = parser.parse();
     cout << "[+] Graph parsed" << endl;
 
-    if (graph->isCyclic()){
-        cout << "The graph is cyclic" << endl;
-        cout << "[+] Removing backward links" << endl;
-        graph->removeBackwardLinks();
-    } 
-    else {
-        cout << "The graph is acyclic" << endl;
-    }
+    //if (graph->isCyclic()){
+    //    cout << "The graph is cyclic" << endl;
+    //    cout << "[+] Removing backward links" << endl;
+    //    graph->removeBackwardLinks();
+    //} 
+    //else {
+    //    cout << "The graph is acyclic" << endl;
+    //}
 
     //getSDPairs(graph);
 
-    string source  = "1";
+    string source  = "20";
     string destination = "24";
     //if ( graph->pathExists(source, destination) ){
     //    cout << "Path from " << source << " to " << destination << " exists" << endl;
@@ -49,7 +49,7 @@ int main() {
     //graph->dijkstra(source, '+', destination, '+').printPath();
     
     KarpRabin kr(4, 101);
-    string pattern = "AGTGTTTCATCCTGCAAAGCCGGGG";
+    string pattern = "AGAG";
     
     bool A = kr.run(paths, pattern);
     cout << "kr.run(paths, pattern): " << A << endl;  

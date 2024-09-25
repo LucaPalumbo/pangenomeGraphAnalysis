@@ -71,43 +71,51 @@ bool KarpRabin::run(string text, string pattern)
 
 bool KarpRabin::runUtil(PangenomeGraph graph, string sequence,
                         int sequence_offset, uint64_t hash, int segment_index, char orientation,
-                        vector<bool> &visitedPlus, vector<bool> &visitedMinus)
+                        int prev_size, vector<bool> &visitedPlus, vector<bool> &visitedMinus)
 {
 
-    graph.setVectorWithOrientation(segment_index, orientation, visitedPlus, visitedMinus, true);
-
-    if (orientation == '-')
-    {
-        sequence += graph.segments[segment_index].complementary();
-    }
-    else
+    // aggiungo il segmento alla sequenza tenendo conto dell'orientazione
+    if (orientation == '+')
     {
         sequence += graph.segments[segment_index].sequence;
     }
+    else
+    {
+        sequence += graph.segments[segment_index].complementary();
+    }
 
+    // se la sequenza è vuota, calcolo l'hash della prima sottostringa
     if (sequence.empty())
     {
         hash = hashString(sequence.substr(0, pattern.size()));
     }
 
+    // Questo while si occupa di controllare se in questa sequenza è presente il pattern
     while (sequence_offset + pattern.size() <= sequence.size())
     {
-        cout << "Sequence: " << sequence << endl;
-        cout << "Sequence offset: " << sequence_offset << endl;
-        cout << "Substring: " << sequence.substr(sequence_offset, pattern.size()) << endl;
-        cout << "Sequence size: " << sequence.size() << endl;
-        cout << "Pattern size: " << pattern.size() << endl;
-        cout << "Pattern: " << pattern << endl;
-        cout << "Hash: " << hash << endl;
-        cout << "Pattern hash: " << pattern_hash << endl;
-        cout << endl;
-
+        // alla prima chiamata hash è -1, lo setto al valore dell'hash della prima sottostringa
+        if (hash == -1)
+        {
+            hash = hashString(sequence.substr(sequence_offset, pattern.size()));
+        }
+        // per le altre chiamate ricorsive, ricalcolo l'hash della sottostringa
+        else
+        {
+            hash = rehash(hash, sequence[sequence_offset - 1], sequence[sequence_offset - 1 + pattern.size()], pattern.size());
+        }
+        // controllo se il segmento è già stato visitato. Se sì, non lo visito di nuovo evitando di controllare due volte la stessa sequenza
+        if (graph.isSegmentVisitedWithOrientation(segment_index, orientation, visitedPlus, visitedMinus) && sequence_offset >= prev_size)
+        {
+            cout << "segment already visited: " << graph.getSegmentName(segment_index) << endl;
+            return false;
+        }
+        // se gli hash corrispodono controllo anche le stringhe per evitare collisioni. Se il pattern è stato trovato, ritorno true
         if (hash == pattern_hash && string_compare(sequence.substr(sequence_offset, pattern.size()), pattern))
         {
             cout << "Pattern found in sequence: " << sequence << endl;
             return true;
         }
-        hash = rehash(hash, sequence[sequence_offset], sequence[sequence_offset + pattern.size()], pattern.size());
+        // incremento l'offset della sequenza per controllare la prossima sottostringa
         sequence_offset++;
     }
 
@@ -115,26 +123,23 @@ bool KarpRabin::runUtil(PangenomeGraph graph, string sequence,
     {
         if (link.fromOrient == orientation)
         {
-            if (runUtil(graph, sequence, sequence_offset, hash, link.to, link.toOrient, visitedPlus, visitedMinus))
+            // chiamata ricorsiva per il segmento successivo
+            if (runUtil(graph, sequence, sequence_offset, hash, link.to, link.toOrient, sequence.size(), visitedPlus, visitedMinus))
             {
                 return true;
             }
         }
     }
+    // se arrivo qui ho esplorato completamente questo vertice quindi lo marco come visitato
+    graph.setVectorWithOrientation(segment_index, orientation, visitedPlus, visitedMinus, true);
     return false;
 }
 
-bool KarpRabin::run(vector<Path> paths, string pattern)
+void KarpRabin::getGraphFromPaths(PangenomeGraph &graph,vector<Path> paths)
 {
-    this->pattern = pattern;
-    unordered_map<int, bool> visited;
-    pattern_hash = hashString(pattern);
-    uint32_t pattern_size = pattern.size();
-
-    // RICOSTRUISCI IL GRAFO DEI PERCORSI SORGENTE-DESTINAZIONE
     unordered_map<string, bool> added_segments;
     unordered_map<string, bool> added_paths;
-    PangenomeGraph graph;
+    // Aggiungo i segmenti al grafo dei percorsi
     for (Path path : paths)
     {
         for (int i = 0; i < path.segments.size(); i++)
@@ -146,12 +151,14 @@ bool KarpRabin::run(vector<Path> paths, string pattern)
             }
         }
     }
+    // Aggiungo i link al grafo dei percorsi
     for (Path path : paths)
     {
         for (int i = 0; i < path.segments.size(); i++)
         {
             if (i < path.segments.size() - 1)
             {
+                // link_name è un identificatore univoco dei link. E' la concatenazione dei nomi dei segmenti e delle orientazioni
                 string link_name = path.segments[i].name + path.orientations[i] + path.segments[i + 1].name + path.orientations[i + 1];
                 if (added_paths.find(link_name) == added_paths.end())
                 {
@@ -161,14 +168,27 @@ bool KarpRabin::run(vector<Path> paths, string pattern)
             }
         }
     }
+}
+
+bool KarpRabin::run(vector<Path> paths, string pattern)
+{
+    this->pattern = pattern;
+    pattern_hash = hashString(pattern);
+    uint32_t pattern_size = pattern.size();
+
+    // crea il grafo dei percorsi sorgente-destinazione
+    PangenomeGraph graph;
+    getGraphFromPaths(graph, paths);
+
     graph.printLinks();
     graph.printSegments();
 
+    // inizializza i vettori ausiliari per la visita dei segmenti per non controllare due volte le stesse sequenze
     vector<bool> visitedPlus(graph.segments.size(), false);
     vector<bool> visitedMinus(graph.segments.size(), false);
-    uint64_t hash = hashString(paths[0].getSequence().substr(0, pattern_size));
     string sequence = "";
-    if (runUtil(graph, sequence, 0, hash, 0, '+', visitedPlus, visitedMinus) || runUtil(graph, sequence, 0, hash, 0, '-', visitedPlus, visitedMinus))
+    // lancio la funzione ricorsiva
+    if (runUtil(graph, sequence, 0, -1, 0, '+', 0, visitedPlus, visitedMinus) || runUtil(graph, sequence, 0, -1, 0, '-', 0, visitedPlus, visitedMinus))
     {
         return true;
     }

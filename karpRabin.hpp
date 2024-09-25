@@ -24,8 +24,9 @@ class KarpRabin{
         uint64_t rehash(uint64_t old_hash, char old_char, char new_char, uint32_t pattern_size);
         bool run(string text, string pattern);
         bool run( vector<Path> paths, string pattern);
-        bool runUtil(PangenomeGraph graph, string sequence, int sequence_offset, uint64_t hash, int segment_index, char orientation, vector<bool> &visitedPlus, vector<bool> &visitedMinus);
+        bool runUtil(PangenomeGraph graph, string sequence, int sequence_offset, uint64_t hash, int segment_index, char orientation, int prev_size, vector<bool> &visitedPlus, vector<bool> &visitedMinus);
         bool string_compare(string text, string pattern);
+        void getGraphFromPaths(PangenomeGraph &graph, vector<Path> paths);
         
 };
 
